@@ -1,0 +1,100 @@
+.bg-container {
+  display: flex;
+  height: 100vh;
+}
+
+.from-card-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+}
+
+.kitchens-tasty {
+  font-family: DM Sans;
+  font-size: 34px;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0px;
+  text-align: left;
+  color: #f7931e;
+  margin-top: 0px;
+}
+
+.login-heading {
+  font-family: DM Sans;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 40px;
+  letter-spacing: 0em;
+  text-align: center;
+  margin-top: 0px;
+}
+
+.website-logo {
+  width: 50px;
+}
+
+.image-container {
+  width: 50%;
+}
+
+.container-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.container-userName {
+  display: flex;
+  flex-direction: column;
+}
+
+.container-password {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.button-login {
+  margin-top: 20px;
+  width: 350px;
+  height: 40px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f7931e;
+  font-family: DM Sans;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: 0em;
+  color: #ffffff;
+}
+
+.input-Element {
+  background-color: #e2e8f0;
+  border: none;
+  height: 40px;
+  width: 350px;
+}
+
+.user-label {
+  font-family: DM Sans;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.01em;
+  text-align: left;
+}
+
+.msg-error {
+  color: #ef4444;
+  font-family: DM Sans;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0em;
+  text-align: left;
+}
