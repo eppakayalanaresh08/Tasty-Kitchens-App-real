@@ -1,73 +1,26 @@
-import {Component} from 'react'
-
 import Cookies from 'js-cookie'
+import {Redirect} from 'react-router-dom'
 
-import Loader from 'react-loader-spinner'
+import Header from '../Header'
+import Carousel from '../Carousel'
+import PopularRestaurants from '../PopularRestaurants'
+import Footer from '../Footer'
+import './index.css'
 
-const SwitchApiMount = {
-  isInitial: INITIAL,
-  isSuccess: SUCCESS,
-  isFailure: FAILURE,
-  isLoading: LOADING,
-}
-
-class Home extends Component {
-  state = {statusApi: SwitchApiMount.isInitial}
-
-  componentDidMount() {
-    this.getProducts()
+const Home = () => {
+  const jwtToken = Cookies.get('jwt_token')
+  if (jwtToken === undefined) {
+    return <Redirect to="/login" />
   }
 
-  getProducts = async () => {
-    this.setState({statusApi: SwitchApiMount.isLoading})
-    const jwtToken = Cookies.get('jwt_token')
-    const url = 'https://apis.ccbp.in/restaurants-list/offers'
-    const options = {
-      method: 'GET',
-      Authorization: `Bearer ${jwtToken}`,
-    }
-    const fetchData = await fetch(url, options)
-    if (fetchData.ok === true) {
-      const data = await fetchData.json()
-      console.log(data)
-      this.setState({statusApi: SwitchApiMount.isSuccess})
-    } else {
-      this.setState({statusApi: SwitchApiMount.isFailure})
-    }
-  }
-
-  renderSuccess = () => {}
-
-  renderFailure = () => {}
-
-  renderLoading = () => (
-    <div>
-      <Loader type="Oval" color="#ffffff" height={50} width={50} />
-    </div>
+  return (
+    <>
+      <Header activeTab="HOME" />
+      <Carousel />
+      <PopularRestaurants />
+      <Footer />
+    </>
   )
-
-  renderSwitch = () => {
-    const {statusApi} = this.state
-    switch (statusApi) {
-      case SwitchApiMount.isSuccess:
-        return this.renderSuccess()
-      case SwitchApiMount.isFailure:
-        return this.renderFailure()
-      case SwitchApiMount.isLoading:
-        return this.renderLoading()
-      default:
-        return null
-    }
-  }
-
-  render() {
-    return (
-      <div>
-        <p>hlo</p>
-        {this.renderSwitch()}
-      </div>
-    )
-  }
 }
 
 export default Home

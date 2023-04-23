@@ -1,4 +1,4 @@
-import {Route, Redirect} from 'react'
+import {Route, Redirect} from 'react-router-dom'
 
 import Cookie from 'js-cookie'
 
