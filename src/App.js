@@ -1,117 +1,127 @@
 import {Component} from 'react'
-import {Route, Switch, Redirect} from 'react-router-dom'
+import {Switch, Route, Redirect} from 'react-router-dom'
 
 import Login from './components/Login'
 import Home from './components/Home'
 import Cart from './components/Cart'
-import Payment from './components/Payment'
 import NotFound from './components/NotFound'
-import RestaurantItem from './components/RestaurantItem'
 import ProtectedRoute from './components/ProtectedRoute'
-import CartContext from './context/CartContext'
+import RestaurantDetails from './components/RestaurantDetails'
 
+import CartContext from './context/CartContext'
 import './App.css'
 
-const getCartListFromLocalStorage = () => {
-  const stringifiedCartList = localStorage.getItem('cartData')
-  const parsedCartList = JSON.parse(stringifiedCartList)
-  if (parsedCartList === null) {
+const initializeCartItems = () => {
+  const cartItems = localStorage.getItem('cartData')
+
+  if (cartItems === null) {
     return []
   }
-  return parsedCartList
+  return JSON.parse(cartItems)
 }
 
 class App extends Component {
   state = {
-    cartList: getCartListFromLocalStorage(),
+    isOrderPlaced: false,
+    cartItems: initializeCartItems(),
   }
 
-  addCartItem = foodItem => {
-    const {cartList} = this.state
-    const foodObject = cartList.find(
-      eachCartItem => eachCartItem.id === foodItem.id,
-    )
-    if (foodObject) {
-      this.setState(prevState => ({
-        cartList: prevState.cartList.map(eachCartItem => {
-          if (foodObject.id === eachCartItem.id) {
-            const updatedQuantity = foodItem.quantity
-
-            return {...eachCartItem, quantity: updatedQuantity}
-          }
-
-          return eachCartItem
-        }),
-      }))
-    } else {
-      const updatedCartList = [...cartList, foodItem]
-      this.setState({cartList: updatedCartList})
-    }
-  }
-
-  deleteCartItem = id => {
-    const {cartList} = this.state
-    const updatedCartList = cartList.filter(
-      eachCartItem => eachCartItem.id !== id,
-    )
-    this.setState({cartList: updatedCartList})
-  }
-
-  addQuantity = id => {
-    this.setState(prevState => ({
-      cartList: prevState.cartList.map(eachCartItem => {
-        if (id === eachCartItem.id) {
-          const updatedQuantity = eachCartItem.quantity + 1
-          return {...eachCartItem, quantity: updatedQuantity}
-        }
-        return eachCartItem
+  addCartItem = item => {
+    this.setState(
+      preState => ({
+        isOrderPlaced: false,
+        cartItems: [...preState.cartItems, item],
       }),
-    }))
+      this.updateLocalStorage,
+    )
+  }
+
+  getQuantity = id => {
+    const {cartItems} = this.state
+    const currentItem = cartItems.find(item => item.id === id)
+    return currentItem === undefined ? 0 : currentItem.quantity
+  }
+
+  removeCartItem = id => {
+    this.setState(
+      preState => ({
+        cartItems: preState.cartItems.filter(item => item.id !== id),
+      }),
+      this.updateLocalStorage,
+    )
+  }
+
+  increaseQuantity = id => {
+    this.setState(
+      preState => ({
+        cartItems: preState.cartItems.map(item => {
+          if (item.id === id) {
+            return {...item, quantity: item.quantity + 1}
+          }
+          return item
+        }),
+      }),
+      this.updateLocalStorage,
+    )
   }
 
   decreaseQuantity = id => {
-    const {cartList} = this.state
-    const productObject = cartList.find(eachCartItem => eachCartItem.id === id)
-    if (productObject.quantity > 1) {
-      this.setState(prevState => ({
-        cartList: prevState.cartList.map(eachCartItem => {
-          if (id === eachCartItem.id) {
-            const updatedQuantity = eachCartItem.quantity - 1
-            return {...eachCartItem, quantity: updatedQuantity}
+    this.setState(
+      preState => ({
+        cartItems: preState.cartItems.map(item => {
+          if (item.id === id) {
+            return {...item, quantity: item.quantity - 1}
           }
-          return eachCartItem
+          return item
         }),
-      }))
-    } else {
-      this.deleteCartItem(id)
-    }
+      }),
+      this.updateLocalStorage,
+    )
+  }
+
+  placeOrder = () => {
+    this.setState(
+      {
+        cartItems: [],
+        isOrderPlaced: true,
+      },
+      this.updateLocalStorage,
+    )
+  }
+
+  updateLocalStorage = () => {
+    const {cartItems} = this.state
+    localStorage.setItem('cartData', JSON.stringify(cartItems))
   }
 
   render() {
-    const {cartList} = this.state
-    localStorage.setItem('cartData', JSON.stringify(cartList))
+    const {isOrderPlaced, cartItems} = this.state
+
+    const cartContextValue = {
+      cartItems,
+      isOrderPlaced,
+      placeOrder: this.placeOrder,
+      addCartItem: this.addCartItem,
+      getQuantity: this.getQuantity,
+      removeCartItem: this.removeCartItem,
+      increaseQuantity: this.increaseQuantity,
+      decreaseQuantity: this.decreaseQuantity,
+    }
+
     return (
-      <CartContext.Provider
-        value={{
-          cartList,
-          addCartItem: this.addCartItem,
-          deleteCartItem: this.deleteCartItem,
-          addQuantity: this.addQuantity,
-          decreaseQuantity: this.decreaseQuantity,
-        }}
-      >
+      <CartContext.Provider value={cartContextValue}>
         <Switch>
           <Route exact path="/login" component={Login} />
           <ProtectedRoute exact path="/" component={Home} />
+          <ProtectedRoute exact path="/cart" component={Cart} />
           <ProtectedRoute
             exact
             path="/restaurant/:id"
-            component={RestaurantItem}
+            component={RestaurantDetails}
           />
-          <ProtectedRoute exact path="/cart" component={Cart} />
-          <ProtectedRoute exact path="/payment" component={Payment} />
-          <Route path="/not-found" component={NotFound} />
-          <Redirect to="not-found" />
+
+          <Route exact path="/bad-path" component={NotFound} />
+          <Redirect to="/bad-path" />
         </Switch>
       </CartContext.Provider>
     )

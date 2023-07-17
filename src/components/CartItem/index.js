@@ -1,70 +1,76 @@
-import {BsPlusSquare, BsDashSquare} from 'react-icons/bs'
-import {AiFillCloseCircle} from 'react-icons/ai'
-import {FaRupeeSign} from 'react-icons/fa'
+import {BiRupee} from 'react-icons/bi'
+
 import CartContext from '../../context/CartContext'
 
 import './index.css'
 
-const CartItem = props => (
-  <CartContext.Consumer>
-    {value => {
-      const {deleteCartItem, addQuantity, decreaseQuantity} = value
-      const {cartItemDetails} = props
-      const {id, name, quantity, cost, imageUrl} = cartItemDetails
-      const onDeleteCartItem = () => {
-        deleteCartItem(id)
-      }
-      const onAddQuantity = () => {
-        addQuantity(id)
-      }
-      const onDecreaseQuantity = () => {
+const CartItem = props => {
+  const {data} = props
+  const {id, name, imageUrl, quantity, cost} = data
+
+  const renderCartItem = value => {
+    const {removeCartItem, increaseQuantity, decreaseQuantity} = value
+
+    const onClickIncrement = () => {
+      increaseQuantity(id)
+    }
+
+    const onClickDecrement = () => {
+      if (quantity === 1) {
+        removeCartItem(id)
+      } else {
         decreaseQuantity(id)
       }
-      return (
-        <li data-testid="cartItem" className="cart-item">
-          <img className="cart-product-image" src={imageUrl} alt={name} />
-          <div className="cart-item-details-container">
-            <div className="cart-product-title-brand-container">
-              <h1 className="cart-product-title">{name}</h1>
-            </div>
-            <div className="cart-quantity-container">
-              <button
-                data-testid="decrement-quantity"
-                onClick={onDecreaseQuantity}
-                type="button"
-                className="quantity-controller-button"
-              >
-                <BsDashSquare color="#52606D" size={12} />
-              </button>
-              <p data-testid="item-quantity" className="cart-quantity">
-                {quantity}
-              </p>
-              <button
-                data-testid="increment-quantity"
-                onClick={onAddQuantity}
-                type="button"
-                className="quantity-controller-button"
-              >
-                <BsPlusSquare color="#52606D" size={12} />
-              </button>
-            </div>
-            <div className="total-price-delete-container">
-              <p className="cart-total-price" data-testid="total-price">
-                <FaRupeeSign /> {cost * quantity}/-
-              </p>
-            </div>
+    }
+
+    return (
+      <li className="cart-item-li" data-testid="cartItem">
+        <img className="li-mobile-item-image" src={imageUrl} alt={name} />
+
+        <div className="li-all-details-container">
+          <div className="li-item-details-container">
+            <img className="li-item-image" src={imageUrl} alt={name} />
+            <h1 className="li-item-name">{name}</h1>
           </div>
-          <button
-            className="delete-button"
-            type="button"
-            onClick={onDeleteCartItem}
-          >
-            <AiFillCloseCircle color="#616E7C" size={20} />
-          </button>
-        </li>
-      )
-    }}
-  </CartContext.Consumer>
-)
+
+          <div className="li-item-quantity-cost-container">
+            <button
+              className="counter-button"
+              data-testid="decrement-quantity"
+              type="button"
+              onClick={onClickDecrement}
+            >
+              -
+            </button>
+            <p className="counter-count" data-testid="item-quantity">
+              {quantity}
+            </p>
+            <button
+              className="counter-button"
+              data-testid="increment-quantity"
+              type="button"
+              onClick={onClickIncrement}
+            >
+              +
+            </button>
+          </div>
+
+          <div className="li-item-quantity-cost-container">
+            <BiRupee className="li-item-cost-icon" />
+            <p className="li-item-cost-icon" data-testid="total-price">
+              {cost * quantity}.00
+            </p>
+          </div>
+        </div>
+      </li>
+    )
+  }
+
+  return (
+    <CartContext.Consumer>
+      {value => renderCartItem(value)}
+    </CartContext.Consumer>
+  )
+}
 
 export default CartItem

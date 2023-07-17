@@ -1,45 +1,126 @@
+import {Link} from 'react-router-dom'
+import {BiRupee} from 'react-icons/bi'
 import CartContext from '../../context/CartContext'
 
 import Header from '../Header'
-
-import EmptyCartView from '../EmptyCartView'
-
-import CartListView from '../CartListView'
-
-import CartTotal from '../CartTotal'
-
 import Footer from '../Footer'
+import CartItem from '../CartItem'
 
-const Cart = () => (
-  <CartContext.Consumer>
-    {value => {
-      const {cartList} = value
-      const showEmptyView = cartList.length === 0
+import './index.css'
 
-      return (
-        <>
-          <Header act8veTab="CART" />
-          <div className="cart-container">
-            {showEmptyView ? (
-              <EmptyCartView />
-            ) : (
-              <div className="cart-content-container" data-testid="cartItem">
-                <div className="cart-headings-container">
-                  <p className="cart-headings item">Item</p>
-                  <p className="cart-headings quantity">Quantity</p>
-                  <p className="cart-headings price">Price</p>
-                  <p className="cart-headings">Remove</p>
-                </div>
-                <CartListView />
-                <CartTotal />
-              </div>
-            )}
+const Cart = () => {
+  const getTotalPrice = cartItems =>
+    cartItems.reduce((total, item) => total + item.quantity * item.cost, 0)
+
+  const renderOrdersStatusView = noOrders => (
+    <div className="cart-route">
+      <Header />
+      <div className="orders-status-container">
+        {noOrders ? (
+          <img
+            className="empty-cart-image"
+            src="https://res.cloudinary.com/pavankalyanbandaru/image/upload/v1651083038/tasty-kitchens/no-orders-yet.png"
+            alt="empty cart"
+          />
+        ) : (
+          <img
+            className="order-placed-image"
+            src="https://res.cloudinary.com/pavankalyanbandaru/image/upload/v1651083036/tasty-kitchens/order-successful.png"
+            alt="order successful"
+          />
+        )}
+
+        <h1 className="cart-order-heading">
+          {noOrders ? 'No Order Yet!' : 'Payment Successful'}
+        </h1>
+
+        {noOrders ? (
+          <p className="cart-order-description">
+            Your cart is empty. Add something from the menu.
+          </p>
+        ) : (
+          <p className="cart-order-description">
+            Thank you for ordering. <br />
+            Your payment is successfully completed.
+          </p>
+        )}
+
+        <Link to="/">
+          <button className="cart-default-button" type="button">
+            {noOrders ? 'Order Now' : 'Go To Home Page'}
+          </button>
+        </Link>
+      </div>
+    </div>
+  )
+
+  const renderCartItemsSection = value => {
+    const {cartItems, placeOrder} = value
+
+    return (
+      <>
+        <Header />
+        <div className="cart-section">
+          <ul className="cart-items-container">
+            <li className="cart-items-header-li">
+              <p className="li-cart-item-title w-36">Item</p>
+              <p className="li-cart-item-title w-32">Quantity</p>
+              <p className="li-cart-item-title w-32">Price</p>
+            </li>
+
+            {cartItems.map(item => (
+              <CartItem key={item.id} data={item} />
+            ))}
+          </ul>
+          <hr className="cart-hr" />
+
+          <div className="cart-summary-container">
+            <h1 className="cart-order-total-text">Order Total:</h1>
+
+            <div className="cart-total-cost-container">
+              <BiRupee className="cart-total-rupee-icon" />
+              <p className="cart-total-cost" data-testid="total-price">
+                {getTotalPrice(cartItems)}.00
+              </p>
+            </div>
           </div>
-          <Footer />
-        </>
-      )
-    }}
-  </CartContext.Consumer>
-)
 
+          <div className="cart-place-order-container">
+            <button
+              className="cart-default-button"
+              type="button"
+              onClick={placeOrder}
+            >
+              Place Order
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    )
+  }
+
+  const renderCartRoute = value => {
+    const {cartItems, isOrderPlaced} = value
+
+    // Returns Order Placed Successful view
+    if (isOrderPlaced) {
+      return renderOrdersStatusView(false)
+    }
+
+    // Returns No Orders View
+    if (cartItems.length === 0) {
+      return renderOrdersStatusView(true)
+    }
+
+    // Returns Cart List view
+    return renderCartItemsSection(value)
+  }
+
+  return (
+    <CartContext.Consumer>
+      {value => renderCartRoute(value)}
+    </CartContext.Consumer>
+  )
+}
 export default Cart
